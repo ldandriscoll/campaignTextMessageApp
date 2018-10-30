@@ -1,0 +1,205 @@
+function sendSMS() {
+
+//function called by assigning send icon but UI option would work as well. 
+//find template sheets and proper formatting here here: 
+//https://docs.google.com/spreadsheets/d/1az6k0BzcKGKnWfjYF1Y_qrx80SCWvM1oEmbA-A8rzF8/edit?usp=sharing
+//
+  
+  var senderPhone = ENTER YOUR TWILIO NUMBER HERE // example: +18445026804
+  var accountSid = "ENTER TWILIO SID HERE";
+  var authToken = "ENTER TWILIO AUTH TOKEN HERE";			
+  
+  
+  
+  
+  var sheet      = SpreadsheetApp.openByUrl("ENTER SPREADSHEET URL HERE")
+  
+  var appSheet   = sheet.getSheetByName("SMS App")
+  
+  var phoneSheet = sheet.getSheetByName("Phone Number List")
+  //var phoneSheet = SpreadsheetApp.openByUrl("https://docs.google.com/spreadsheets/d/1wY7sn6FimkvtOT-EBgcsGDVb-DRNdP9Q25nCNuBBAnc/edit#gid=1579327174").getSheetByName("Test")
+  
+  var personalize = appSheet.getRange(37,4).getValue()
+  
+  var bodyCheck = appSheet.getRange(16,5).getValue()
+  
+  
+  
+  
+  
+  var length = bodyCheck.length
+  
+  if (length > 153) {
+    
+    Browser.msgBox("Hey there! Your text message contains "+length+" characters. The SMS limit is 153 characters. Get your character limit below 153 and send it again!")
+    
+    return
+    
+  }
+  
+  //set status
+  appSheet.getRange(31,6).setValue("Sending Messages...")
+  
+  
+  var lastRow = phoneSheet.getLastRow()
+    
+  var lastColumn = phoneSheet.getLastColumn()
+    
+  var dataRange = phoneSheet.getRange(2,1, lastRow, 12)
+  
+  var allData = dataRange.getValues()
+  
+  
+  
+  //a is message counter
+  var a = 0
+  var x = 0
+  var isFilled = true
+  
+  while (isFilled) {
+    
+    //var phoneCheck = phoneSheet.getRange(1+x,8).getValue()
+    var phoneCheck = allData[x][7] 
+    
+    Logger.log("PhoneCheck: "+phoneCheck)
+    
+    //var statusCheck = phoneSheet.getRange(1+x,12).getValue()
+    var statusCheck = allData[x][11] 
+    
+    
+    
+    if (phoneCheck !== "") {
+      
+     
+      if (statusCheck == "") {
+        
+        
+        
+        if (personalize == "Yes") {
+   
+           var name = phoneSheet.getRange(2+x,2).getValue()
+           var greeting = appSheet.getRange(19,15).getValue()
+           var textContent = appSheet.getRange(16,5).getValue()
+           
+           var bodyTest = ""+greeting+" "+name+"! "+textContent+""
+           
+           var bodyLength = bodyTest.length
+           
+           //drop greeting if name makes text message too long. 
+           if (bodyLength > 153) {
+             
+             var body = ""+greeting+"! "+textContent+""
+             
+             
+   
+             
+           }
+          
+          
+          
+          else {
+            
+            var body = ""+greeting+" "+name+"! "+textContent+""
+            
+          }
+           
+           
+           
+           
+         
+            
+           
+          }
+        
+        else {
+         
+          var body = textContent
+          
+        }
+        
+        
+        
+        a++
+      			
+      var url = "https://api.twilio.com/2010-04-01/Accounts/" + accountSid + "/SMS/Messages.json";
+      var options = {
+      method: "post",
+      headers: {
+      Authorization: "Basic " + Utilities.base64Encode(accountSid + ":" + authToken)
+      },
+      payload: {
+      // From is one of your Twilio phone numbers
+      From: senderPhone,
+      To: "+1"+phoneCheck+"",
+       
+      Body: body,
+
+    }
+  };
+  var response = UrlFetchApp.fetch(url, options);
+  Logger.log(response);
+   //phoneSheet.getRange(1+x,12).setValue("Sent")
+   //phoneSheet.getRange(1+x,3).setValue(new Date())
+  
+
+  if (x % 100 == 0) {
+    
+ appSheet.getRange(31,8).setValue(x+1)
+
+  }
+        
+        
+        Logger.log("X : "+x)
+        
+        x++
+        
+        
+        
+      }
+      
+      else {
+        
+        x++
+        
+          Logger.log("filled X : "+x)
+        
+      }
+      
+      
+      
+      
+      
+    }
+    
+    else {
+      
+      
+      isFilled = false
+      
+      appSheet.getRange(31,6).setValue("Completed!")
+      
+      var finalRow = x+1
+            
+      
+      var sendArray = []
+      for (var b =0 ; b < a; b++) {
+       
+        sendArray.push(["Send"])
+        
+      }
+      
+      
+      //phoneSheet.getRange(a,12,a,1).setValues(sendArray)
+      
+      
+      
+    }
+    
+    
+    
+    
+    
+  }
+  
+  
+}
