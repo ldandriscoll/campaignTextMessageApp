@@ -17,7 +17,7 @@ function sendSMS() {
   var appSheet   = sheet.getSheetByName("SMS App")
   
   var phoneSheet = sheet.getSheetByName("Phone Number List")
-  //var phoneSheet = SpreadsheetApp.openByUrl("https://docs.google.com/spreadsheets/d/1wY7sn6FimkvtOT-EBgcsGDVb-DRNdP9Q25nCNuBBAnc/edit#gid=1579327174").getSheetByName("Test")
+  
   
   var personalize = appSheet.getRange(37,4).getValue()
   
